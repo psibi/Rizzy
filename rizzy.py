@@ -36,6 +36,8 @@ class rizzy:
         self.secret_textbuffer=builder.get_object("secret_textbuffer")
         self.oimage_entry=builder.get_object("oimage_entry")
         self.rizzy_pb=builder.get_object("rizzy_pb")
+        self.smsg_label=builder.get_object("smsg_label")
+        self.secret_text=builder.get_object("secret_text")
         builder.connect_signals(self)
         self.keyless_radiobutton.set_active(True)
 
@@ -65,7 +67,12 @@ class rizzy:
         if self.oimage_entry.get_text()=="":
             return False
         return True
-        
+
+    def decode_validate(self):
+        if self.image_entry.get_text()=="Image Not Selected":
+            return False
+        return True
+
     def create_temp_file(self):
         start,end = self.secret_textbuffer.get_bounds()
         text = self.secret_textbuffer.get_text(start,end)
@@ -73,6 +80,20 @@ class rizzy:
         fhandler = open(filename,"w")
         fhandler.write(text)
         fhandler.close()
+
+    def initial_values(self):
+        self.rizzy_pb.set_fraction(0.0)
+        self.image_entry.set_text("Image Not Selected")
+        self.oimage_entry.set_text("")
+        self.secret_textbuffer.set_text("")
+
+    def on_encode_radiobutton_toggled(self,widget,data=None):
+        if self.decode_radiobutton.get_active():
+            self.secret_text.set_can_focus(False)
+            self.oimage_entry.set_can_focus(False)
+        if self.encode_radiobutton.get_active():
+            self.secret_text.set_can_focus(False)
+            self.oimage_entry.set_can_focus(False)
 
     def on_start_button_clicked(self,widget,data=None):
         if self.encode_radiobutton.get_active():
@@ -83,16 +104,31 @@ class rizzy:
                 cmd="./rstep.py -e -i "
                 cmd = cmd + iimage + " -t .secret -o " + oimage
                 args=shlex.split(cmd)
-                self.rizzy_pb.show()
                 self.rizzy_pb.set_fraction(0.4)
                 process=subprocess.Popen(args,bufsize=0,shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=None)
                 self.rizzy_pb.set_fraction(0.9)
-                time.sleep(1)
-                self.rizzy_pb.set_fraction(0)
-                self.rizzy_pb.hide()
+                self.rizzy_pb.set_fraction(1)
                 dlg=gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,"Message Hidden in Image")
                 dlg.run()
                 dlg.destroy()
+                self.initial_values()
+            else:
+                dlg=gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT,gtk.MESSAGE_ERROR,gtk.BUTTONS_OK,"Parameters Missing")
+                dlg.run()
+                dlg.destroy()
+        if self.decode_radiobutton.get_active():
+            if self.decode_validate():
+                cmd="./rstep.py -d -i "
+                iimage = self.image_entry.get_text()
+                cmd = cmd + iimage 
+                args=shlex.split(cmd)
+                self.rizzy_pb.set_fraction(0.4)
+                process=subprocess.Popen(args,bufsize=0,shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=None)
+                self.rizzy_pb.set_fraction(0.9)
+                self.rizzy_pb.set_fraction(1.0)
+                output=process.communicate()
+                if output[0]:
+                    self.secret_textbuffer.set_text(output[0])
 
 if __name__=="__main__":
     steg = rizzy()
