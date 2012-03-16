@@ -20,6 +20,7 @@ import gtk
 import gtk.glade
 import shlex
 import subprocess
+import time
 
 class rizzy:
     def __init__(self):
@@ -34,6 +35,7 @@ class rizzy:
         self.secret_window=builder.get_object("secret_window")
         self.secret_textbuffer=builder.get_object("secret_textbuffer")
         self.oimage_entry=builder.get_object("oimage_entry")
+        self.rizzy_pb=builder.get_object("rizzy_pb")
         builder.connect_signals(self)
         self.keyless_radiobutton.set_active(True)
 
@@ -81,8 +83,16 @@ class rizzy:
                 cmd="./rstep.py -e -i "
                 cmd = cmd + iimage + " -t .secret -o " + oimage
                 args=shlex.split(cmd)
+                self.rizzy_pb.show()
+                self.rizzy_pb.set_fraction(0.4)
                 process=subprocess.Popen(args,bufsize=0,shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=None)
-                print "done"
+                self.rizzy_pb.set_fraction(0.9)
+                time.sleep(1)
+                self.rizzy_pb.set_fraction(0)
+                self.rizzy_pb.hide()
+                dlg=gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT,gtk.MESSAGE_INFO,gtk.BUTTONS_OK,"Message Hidden in Image")
+                dlg.run()
+                dlg.destroy()
 
 if __name__=="__main__":
     steg = rizzy()
