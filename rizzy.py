@@ -38,6 +38,7 @@ class rizzy:
         self.rizzy_pb=builder.get_object("rizzy_pb")
         self.smsg_label=builder.get_object("smsg_label")
         self.secret_text=builder.get_object("secret_text")
+        self.key_entry=builder.get_object("key_entry")
         builder.connect_signals(self)
         self.keyless_radiobutton.set_active(True)
 
@@ -92,8 +93,8 @@ class rizzy:
             self.secret_text.set_can_focus(False)
             self.oimage_entry.set_can_focus(False)
         if self.encode_radiobutton.get_active():
-            self.secret_text.set_can_focus(False)
-            self.oimage_entry.set_can_focus(False)
+            self.secret_text.set_can_focus(True)
+            self.oimage_entry.set_can_focus(True)
 
     def on_start_button_clicked(self,widget,data=None):
         if self.encode_radiobutton.get_active():
@@ -129,6 +130,18 @@ class rizzy:
                 output=process.communicate()
                 if output[0]:
                     self.secret_textbuffer.set_text(output[0])
+                self.rizzy_pb.set_fraction(0.0)
+
+    def on_ok_button_clicked(self,widget,data=None):
+        key=self.key_entry.get_text()
+        self.secret_window.hide()
+
+    def on_secret_window_destroy(self,window,data=None):
+        self.secret_window.hide()
+        print "done"
+
+    def on_secret_window_destroy_event(self,widget,data=None):
+        self.secret_window.hide()
 
 if __name__=="__main__":
     steg = rizzy()
