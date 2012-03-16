@@ -340,6 +340,8 @@
     <property name="title" translatable="yes">Rizzy Key</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
+    <signal handler="on_secret_window_destroy" name="destroy" swapped="no"/>
+    <signal handler="on_secret_window_destroy_event" name="destroy-event" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox5">
         <property name="visible">True</property>
@@ -411,6 +413,7 @@
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="use_action_appearance">False</property>
+                <signal handler="on_ok_button_clicked" name="clicked" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">False</property>
