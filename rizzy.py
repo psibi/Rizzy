@@ -21,6 +21,7 @@ import gtk.glade
 import shlex
 import subprocess
 import time
+from Crypto.Cipher import AES
 
 class rizzy:
     def __init__(self):
@@ -41,6 +42,7 @@ class rizzy:
         self.key_entry=builder.get_object("key_entry")
         builder.connect_signals(self)
         self.keyless_radiobutton.set_active(True)
+        self.prefix= '2324234342342342'
 
     def on_getimage_button_clicked(self,widget,data=None):
          dialog = gtk.FileChooserDialog("Open..",None,gtk.FILE_CHOOSER_ACTION_OPEN,(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN, gtk.RESPONSE_OK))
@@ -74,9 +76,28 @@ class rizzy:
             return False
         return True
 
+    def encrypt_aes(self,text):
+        length = len(text)
+        if length >= 16:
+            spaces = length%16
+            spaces = 16 - spaces
+        else:
+            spaces = 16 -length
+        a = ""
+        for i in range(spaces):
+            a = a + " "
+        text = text + a
+        print len(text)
+        return AES.new(self.key, AES.MODE_CBC, self.prefix).encrypt(text)
+
+    def decrypt_aes(self,enc_text):
+        return AES.new(self.key, AES.MODE_CBC, self.prefix).decrypt(enc_text)
+
     def create_temp_file(self):
         start,end = self.secret_textbuffer.get_bounds()
         text = self.secret_textbuffer.get_text(start,end)
+        if self.key_radiobutton.get_active():
+            text = self.encrypt_aes(text)
         filename = ".secret"
         fhandler = open(filename,"w")
         fhandler.write(text)
@@ -129,11 +150,15 @@ class rizzy:
                 self.rizzy_pb.set_fraction(1.0)
                 output=process.communicate()
                 if output[0]:
-                    self.secret_textbuffer.set_text(output[0])
+                    if self.key_radiobutton.get_active():
+                        secret = self.decrypt_aes(output[0])
+                        self.secret_textbuffer.set_text(secret)
+                    else:
+                        self.secret_textbuffer.set_text(output[0])
                 self.rizzy_pb.set_fraction(0.0)
 
     def on_ok_button_clicked(self,widget,data=None):
-        key=self.key_entry.get_text()
+        self.key=self.key_entry.get_text()
         self.secret_window.hide()
 
     def on_secret_window_destroy(self,window,data=None):
