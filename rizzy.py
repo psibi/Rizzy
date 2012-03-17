@@ -168,10 +168,14 @@ class rizzy:
             self.secret_window.hide()
 
     def on_secret_window_destroy(self,window,data=None):
-        self.secret_window.hide(), 
+        self.secret_window.hide()
+        self.keyless_radiobutton.set_active(True)
+        return True
 
     def on_secret_window_destroy_event(self,widget,data=None):
         self.secret_window.hide()
+        self.keyless_radiobutton.set_active(True)
+        return True
 
 if __name__=="__main__":
     steg = rizzy()

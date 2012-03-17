@@ -343,6 +343,7 @@
     <property name="window_position">center</property>
     <signal name="destroy" handler="on_secret_window_destroy" swapped="no"/>
     <signal name="destroy-event" handler="on_secret_window_destroy_event" swapped="no"/>
+    <signal name="delete-event" handler="on_secret_window_destroy_event" swapped="no"/>
     <child>
       <object class="GtkVBox" id="vbox5">
         <property name="visible">True</property>
