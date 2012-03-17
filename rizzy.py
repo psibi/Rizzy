@@ -159,11 +159,16 @@ class rizzy:
 
     def on_ok_button_clicked(self,widget,data=None):
         self.key=self.key_entry.get_text()
-        self.secret_window.hide()
+        key_length = len(self.key)
+        if key_length!=16 and key_length!=24 and key_length!=32:
+            dlg=gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT,gtk.MESSAGE_ERROR,gtk.BUTTONS_OK,"AES Key Length Should be 16,24 or 32 bytes")
+            dlg.run()
+            dlg.destroy()
+        else:
+            self.secret_window.hide()
 
     def on_secret_window_destroy(self,window,data=None):
-        self.secret_window.hide()
-        print "done"
+        self.secret_window.hide(), 
 
     def on_secret_window_destroy_event(self,widget,data=None):
         self.secret_window.hide()
