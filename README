@@ -1,0 +1,10 @@
+Rizzy is a Steganography tool written in Python.
+
+Uses stepic tool for Hiding messages in Images.
+
+License: GPLv3
+
+Steps for Executing:
+-------------------
+1) Clone this repository.
+2) $ python rizzy.py
