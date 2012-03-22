@@ -110,6 +110,7 @@ class rizzy:
         self.image_entry.set_text("Image Not Selected")
         self.oimage_entry.set_text("")
         self.secret_textbuffer.set_text("")
+        self.key_entry.set_text("")
 
     def on_encode_radiobutton_toggled(self,widget,data=None):
         if self.decode_radiobutton.get_active():
@@ -136,6 +137,7 @@ class rizzy:
                 dlg.run()
                 dlg.destroy()
                 self.initial_values()
+                self.keyless_radiobutton.set_active(True)
             else:
                 dlg=gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT,gtk.MESSAGE_ERROR,gtk.BUTTONS_OK,"Parameters Missing")
                 dlg.run()
