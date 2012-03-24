@@ -105,16 +105,30 @@ class rizzy:
         return AES.new(self.key, AES.MODE_CBC, self.prefix).encrypt(text)
 
     def decrypt_aes(self,enc_text):
+        print len(enc_text)
         return AES.new(self.key, AES.MODE_CBC, self.prefix).decrypt(enc_text)
 
     def create_temp_file(self):
-        text = self.smsg_entry.get_text()
+        if self.sfile_radiobutton.get_active():
+            fname = self.stxtfile_entry.get_text()
+            fhandler = open(fname,"r")
+            text = fhandler.read()
+            fhandler.close()
+        else:
+            text = self.smsg_entry.get_text()
         if self.key_radiobutton.get_active():
             text = self.encrypt_aes(text)
         filename = ".secret"
         fhandler = open(filename,"w")
         fhandler.write(text)
         fhandler.close()
+        
+    def get_spaces(self,num):
+        space = ""
+        for i in range(num):
+            space = space + " "
+        print len(space)
+        return space
 
     def initial_values(self):
         self.rizzy_pb.set_fraction(0.0)
@@ -152,8 +166,9 @@ class rizzy:
                 iimage = self.image_entry.get_text()
                 self.create_temp_file()
                 ofile = self.ofile_entry.get_text()
+                fname = ".secret"
                 cmd="./rstep.py -e -i "
-                cmd = cmd + iimage + " -t .secret -o " + ofile
+                cmd = cmd + iimage + " -t "+ fname + " -o " + ofile
                 args=shlex.split(cmd)
                 self.rizzy_pb.set_fraction(0.4)
                 process=subprocess.Popen(args,bufsize=0,shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=None)
@@ -180,22 +195,21 @@ class rizzy:
                 self.rizzy_pb.set_fraction(1.0)
                 output=process.communicate()
                 if output[0]:
+                    print output[0]
                     if self.key_radiobutton.get_active():
                         secret = self.decrypt_aes(output[0])
-                        self.smsg_entry.set_text(secret)
+                        print "se:" + secret
+                        self.smsg_entry.set_text(secret.strip())
                     else:
-                        self.smsg_entry.set_text(output[0])
+                        self.smsg_entry.set_text(str(output[0]))
                 self.rizzy_pb.set_fraction(0.0)
 
     def on_ok_button_clicked(self,widget,data=None):
         self.key=self.key_entry.get_text()
         key_length = len(self.key)
-        if key_length!=16 and key_length!=24 and key_length!=32:
-            dlg=gtk.MessageDialog(None,gtk.DIALOG_DESTROY_WITH_PARENT,gtk.MESSAGE_ERROR,gtk.BUTTONS_OK,"AES Key Length Should be 16,24 or 32 bytes")
-            dlg.run()
-            dlg.destroy()
-        else:
-            self.secret_window.hide()
+        if key_length < 16:
+            self.key = self.key + self.get_spaces(16 - key_length)
+        self.secret_window.hide()
 
     def on_secret_window_destroy(self,window,data=None):
         self.secret_window.hide()
