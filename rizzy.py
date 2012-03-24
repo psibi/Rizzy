@@ -36,12 +36,13 @@ class rizzy:
         self.encode_radiobutton=builder.get_object("encode_radiobutton")
         self.decode_radiobutton=builder.get_object("decode_radiobutton")
         self.secret_window=builder.get_object("secret_window")
-        self.secret_textbuffer=builder.get_object("secret_textbuffer")
-        self.oimage_entry=builder.get_object("oimage_entry")
+        self.ofile_entry=builder.get_object("ofile_entry")
         self.rizzy_pb=builder.get_object("rizzy_pb")
-        self.smsg_label=builder.get_object("smsg_label")
-        self.secret_text=builder.get_object("secret_text")
         self.key_entry=builder.get_object("key_entry")
+        self.smsg_entry=builder.get_object("smsg_entry")
+        self.stxtfile_entry=builder.get_object("stxtfile_entry")
+        self.smsg_radiobutton=builder.get_object("smsg_radiobutton")
+        self.sfile_radiobutton=builder.get_object("sfile_radiobutton")
         builder.connect_signals(self)
         self.keyless_radiobutton.set_active(True)
         self.prefix= '2324234342342342'
@@ -55,6 +56,15 @@ class rizzy:
              self.image_entry.set_text(str(filename))
          dialog.destroy()
 
+    def on_gettfile_button_clicked(self,widget,data=None):
+        dialog = gtk.FileChooserDialog("Select Secret File..",None,gtk.FILE_CHOOSER_ACTION_OPEN,(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog.set_default_response(gtk.RESPONSE_OK)
+        response=dialog.run()
+        if response == gtk.RESPONSE_OK:
+            filename = dialog.get_filename() 
+            self.image_entry.set_text(str(filename))
+        dialog.destroy()
+
     def on_key_radiobutton_toggled(self,widget,data=None):
         if self.key_radiobutton.get_active():
             self.secret_window.show()
@@ -65,11 +75,13 @@ class rizzy:
     def encode_validate(self):
         if self.image_entry.get_text()=="Image Not Selected":
             return False
-        start,end = self.secret_textbuffer.get_bounds()
-        text = self.secret_textbuffer.get_text(start,end)
-        if text=="":
-            return False
-        if self.oimage_entry.get_text()=="":
+        if self.smsg_radiobutton.get_active():
+            if self.smsg_entry.get_text()=="":
+                return False
+        else:
+            if self.stxtfile_entry.get_text()=="":
+                return False
+        if self.ofile_entry.get_text()=="":
             return False
         return True
 
@@ -96,8 +108,7 @@ class rizzy:
         return AES.new(self.key, AES.MODE_CBC, self.prefix).decrypt(enc_text)
 
     def create_temp_file(self):
-        start,end = self.secret_textbuffer.get_bounds()
-        text = self.secret_textbuffer.get_text(start,end)
+        text = self.smsg_entry.get_text()
         if self.key_radiobutton.get_active():
             text = self.encrypt_aes(text)
         filename = ".secret"
@@ -108,26 +119,32 @@ class rizzy:
     def initial_values(self):
         self.rizzy_pb.set_fraction(0.0)
         self.image_entry.set_text("Image Not Selected")
-        self.oimage_entry.set_text("")
-        self.secret_textbuffer.set_text("")
+        self.ofile_entry.set_text("")
+        self.smsg_entry.set_text("")
         self.key_entry.set_text("")
 
     def on_encode_radiobutton_toggled(self,widget,data=None):
         if self.decode_radiobutton.get_active():
-            self.secret_text.set_can_focus(False)
-            self.oimage_entry.set_can_focus(False)
+            self.ofile_entry.set_can_focus(False)
         if self.encode_radiobutton.get_active():
-            self.secret_text.set_can_focus(True)
-            self.oimage_entry.set_can_focus(True)
-
+            self.ofile_entry.set_can_focus(True)
+                
+    def on_smsg_radiobutton_toggled(self,widget,data=None):
+        if self.smsg_radiobutton.get_active():
+            self.smsg_entry.set_can_focus(True)
+            self.stxtfile_entry.set_can_focus(False)
+        else:
+            self.smsg_entry.set_can_focus(False)
+            self.stxtfile_entry.set_can_focus(True)
+    
     def on_start_button_clicked(self,widget,data=None):
         if self.encode_radiobutton.get_active():
             if self.encode_validate():
                 iimage = self.image_entry.get_text()
                 self.create_temp_file()
-                oimage = self.oimage_entry.get_text()
+                ofile = self.ofile_entry.get_text()
                 cmd="./rstep.py -e -i "
-                cmd = cmd + iimage + " -t .secret -o " + oimage
+                cmd = cmd + iimage + " -t .secret -o " + ofile
                 args=shlex.split(cmd)
                 self.rizzy_pb.set_fraction(0.4)
                 process=subprocess.Popen(args,bufsize=0,shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE,cwd=None)
@@ -156,9 +173,9 @@ class rizzy:
                 if output[0]:
                     if self.key_radiobutton.get_active():
                         secret = self.decrypt_aes(output[0])
-                        self.secret_textbuffer.set_text(secret)
+                        self.smsg_entry.set_text(secret)
                     else:
-                        self.secret_textbuffer.set_text(output[0])
+                        self.smsg_entry.set_text(output[0])
                 self.rizzy_pb.set_fraction(0.0)
 
     def on_ok_button_clicked(self,widget,data=None):
