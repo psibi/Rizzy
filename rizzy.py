@@ -121,6 +121,7 @@ class rizzy:
         self.image_entry.set_text("Image Not Selected")
         self.ofile_entry.set_text("")
         self.smsg_entry.set_text("")
+        self.stxtfile_entry.set_text("")
         self.key_entry.set_text("")
 
     def on_encode_radiobutton_toggled(self,widget,data=None):
@@ -134,8 +135,16 @@ class rizzy:
             self.smsg_entry.set_can_focus(True)
             self.stxtfile_entry.set_can_focus(False)
         else:
+            self.smsg_entry.set_text("")
             self.smsg_entry.set_can_focus(False)
             self.stxtfile_entry.set_can_focus(True)
+            dialog = gtk.FileChooserDialog("Open..",None,gtk.FILE_CHOOSER_ACTION_OPEN,(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+            dialog.set_default_response(gtk.RESPONSE_OK)
+            response=dialog.run()
+            if response == gtk.RESPONSE_OK:
+                filename = dialog.get_filename() 
+                self.stxtfile_entry.set_text(str(filename))
+            dialog.destroy()
     
     def on_start_button_clicked(self,widget,data=None):
         if self.encode_radiobutton.get_active():
