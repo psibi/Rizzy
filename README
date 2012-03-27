@@ -8,3 +8,5 @@ Steps for Executing:
 -------------------
 1) Clone this repository.
 2) $ python rizzy.py
+
+Note: Make sure that rstep.py and stepic.py is set to executable in it's permission after cloning.
